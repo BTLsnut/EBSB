@@ -6,13 +6,13 @@ html
     script(src='https://code.jquery.com/jquery-3.4.1.min.js')
 body
     //script(type="module" src="js/graph.js")
-    script(type="module" src="js/view.js")
+    script(type="module" src="js/test3.js")
     a-scene(main="" raycaster="" curosr="rayOrigin: mouse")
         a-assets
             video(id="view" crossorigin="anonymous" src="video/v2/v2_dash.mpd")
             img(id="direction" src="image/arrow.png")
 
-        a-entity(look-controls="" camera="" id="camera" rotation="0 90 0" position="0 0.08 0" fov="60")
+        a-entity(cam="" look-controls="" camera="" id="camera" rotation="0 90 0" position="0 0.08 0" fov="60")
             a-cursor(id="cursor")
 
         a-videosphere(id="vr_view" src="#view" rotation="0 90 0")

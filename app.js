@@ -1,6 +1,6 @@
 var express = require('express');
 var app = express();
-var http = require('http').createServer(app)
+var http = require('http').createServer(app);
 var path = require('path');
 var indexRouter = require('./routes/index');
 var transferRouter = require('./routes/transfer');
@@ -13,7 +13,6 @@ app.set('view engine', 'pug');
 
 app.use(express.static(path.join(__dirname, '/public')));
 
-app.use
 app.use('/', indexRouter);
 app.use('/transfer', transferRouter);
 app.use('/graph', graph);
