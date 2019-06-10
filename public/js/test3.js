@@ -1,15 +1,12 @@
-var main_player = dashjs.MediaPlayer().create();
+var vr_view = null;
+var video_dom_c = null;
 var player_list = [];
 var cur_node = 'v2';
 var p_list = [];
 var assets = null;
-var roi = null;
-
-AFRAME.registerComponent('cam', {
-    tick: function () {
-
-    }
-});
+var video_dom = null;
+var a = null;
+var b = null;
 
 AFRAME.registerComponent('main', {
     init: function () {
@@ -26,10 +23,11 @@ AFRAME.registerComponent('main', {
                     node_link[i].weight_link(node_link[j])
                 }
             }
-           
-            var video_dom = document.querySelector('#' + cur_node + '_v');
-            var time = video_dom.currentTime;
-            preload_seg(node_link, time);
+            console.log(node_link);
+
+
+
+            preload_seg(node_link);
 
             AFRAME.registerComponent('view', {
                 init: function () {
@@ -69,8 +67,8 @@ function createView(data) {
         view.setAttribute('view', '');
         view.setAttribute("id", item.filename.split(".")[0]);
         view.setAttribute('material', {
-           alphaTest:1,
-           opacity:0
+            alphaTest:1,
+            opacity:0
         });
         view.setAttribute('geometry', {
             primitive: 'box',
@@ -81,16 +79,38 @@ function createView(data) {
         view.setAttribute('position', item.metadata.pos);
         parent.appendChild(view);
     });
+
+
 }
+// document.onkeydown = function(evt){
+//     if(evt.keyCode == 13){
+//         video_dom_c = document.querySelector('#' + cur_node + '_v');
+//         video_dom_c.pause();
+//         }
+//     }
+// document.onkeyup = function(evt){
+//     if(evt.keyCode == 13){
+//         video_dom_c = document.querySelector('#' + cur_node + '_v');
+//         video_dom_c.play();
+//         }
+//     }
 
 function addElEvent(element, node_link) {
     element.addEventListener('click', function (evt) {
         //cur_node = v1, v2, v3 ..
-        var video_dom = document.querySelector('#' + cur_node + '_v');
-        var time = video_dom.currentTime;
+        var clickTime = new Date();
+        var video_dom_t = document.querySelector('#' + cur_node + '_v');
+        var time = video_dom_t.currentTime;
+
         cur_node = element.id;
 
-        // mpd 변경
+        var video_dom_c = document.querySelector('#' + cur_node + '_v');
+        if(video_dom_c.currentTime !== video_dom_t.currentTime){
+            video_dom_c.currentTime = time;
+            //console.log('current video Time:'+video_dom_c.currentTime);
+        }
+        console.log(cur_node);
+
         let camera = document.querySelector('#camera');
         camera.setAttribute('position', node_link[cur_node].pos);
         if(cur_node === 'v8'){
@@ -109,12 +129,46 @@ function addElEvent(element, node_link) {
             });
         }
         camera.setAttribute('position', node_link[cur_node].pos);
-       // main_player.reset();
-        preload_seg(node_link, time);
 
-        var vr_view = document.querySelector("#vr_view");
+        preload_seg(node_link);//
+
+        vr_view = document.querySelector("#vr_view");
         vr_view.setAttribute('src', '#' + cur_node + '_v');
-        vr_view.play();
+
+        // console.log(video_dom_c.networkState);
+        // console.log(video_dom_c.networkState);
+
+        video_dom_c.onloadeddata = function () {
+            const endTime = new Date();
+            console.log((endTime.getTime() - clickTime.getTime()) / 1000);
+        };
+        //onpause-onplay(애매함, progress안에 넣어보기) onwaiting-onplaying(이거임)
+
+        video_dom_c.onwaiting = function (evt) {
+            const jitterStart = new Date();
+            a = jitterStart.getTime();
+            //console.log('viewcomplete : '+(a-clickTime.getTime())/1000);
+
+            //console.log('비디오 끊김');
+        };
+        // video_dom_c.onpause = function(evt){
+        //     var jitterStart = new Date();
+        //     a = jitterStart.getTime();
+        //     console.log('a:'+a)
+        // }
+        video_dom_c.onplaying = function(evt){
+            var jitterEnd = new Date();
+            b = jitterEnd.getTime();
+            // console.log('b : '+b);
+            // console.log('playingstart : '+(b-clickTime.getTime())/1000);
+            console.log('JITTERtime : '+(b-a)/1000)
+        }
+        // video_dom_c.onseeked = function(){
+        //     var seekTime = new Date();
+        //     console.log('seekTime : '+(seekTime.getTime() - clickTime.getTime())/1000);
+        //  }
+        //};
+
 
     });
 
@@ -143,32 +197,26 @@ function drawArrow(element, node_link) {
     arrow.setAttribute('position', a);
 }
 
-function preload_seg(node_link, time) {
-    
-    for (let i in node_link[cur_node].link) {
-        var video_dom = document.querySelector('#' + i + '_v');
+function preload_seg(node_link) {
 
-        console.log(node_link[cur_node].link[i].distance);
-        if (node_link[cur_node].link[i].distance < 4) {
-     
+    for (let i in node_link[cur_node].link) {
+        video_dom = document.querySelector('#' + i + '_v');
+        if (node_link[cur_node].link[i].distance <5) {
+
             if(Object.keys(player_list).indexOf(i) === -1){
                 player_list[i] = dashjs.MediaPlayer().create();
-                player_list[i].initialize(video_dom, node_link[i].src, true)
+
+                player_list[i].initialize(video_dom, node_link[i].src, true);
+                player_list[i].setABRStrategy('abrThroughput');
+                console.log(player_list[i].getABRStrategy());
             }
-        
-            video_dom.currentTime = time;
             video_dom.play();
             video_dom.setAttribute("preload", "auto");
-            console.log('preload-o:'+i);    
-        }
-        else{
-            video_dom.setAttribute("preload", "none");
+        }else{
             video_dom.pause();
-            console.log('preload-x:'+i);
-            // player_list[i].initialize();        
-            //player_list[i].reset();
-        };
-    };
+            video_dom.setAttribute("preload", "none");
+        }
+    }
 };
 
 class node {
@@ -198,9 +246,9 @@ class node {
 
 
         if (y_val < 0)
-            link_ref.y.y_ref = "top";
-        else if (y_val > 0)
             link_ref.y.y_ref = "bottom";
+        else if (y_val > 0)
+            link_ref.y.y_ref = "top";
 
 
         if (z_val < 0)

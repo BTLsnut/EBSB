@@ -4,56 +4,36 @@
     <meta charset="UTF-8">
     <title>Title</title>
 
-    <script src="js/dash.all.debug.js"></script>
-    <script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
+    <script src = 'js/dash.all.debug.js'></script>
+    <script src="https://aframe.io/releases/0.9.1/aframe.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 </head>
 <body>
 <script src="js/test3.js"></script>
 
-<a-scene main>
-<script>
-</script>
-<!--assets-->
-  <a-assets>
-    <video id="view1" crossorigin="anonymous" muted></video>
-    <video id="view2" crossorigin="anonymous"></video>
-    <video id="view3" crossorigin="anonymous" muted></video>
-    <video id="view4" crossorigin="anonymous" muted></video>
-    <video id="view5" crossorigin="anonymous" muted></video>
-<!--    <image id="view1_img" src="image/view1.png"></image>-->
-<!--    <image id="view2_img" src="image/view2.png"></image>-->
-<!--    <image id="view3_img" src="image/view3.png"></image>-->
-<!--    <image id="view4_img" src="image/view4.png"></image>-->
-<!--    <image id="view5_img" src="image/view5.png"></image>-->
-  </a-assets>
+<a-scene main raycaster cursor="rayOrigin: mouse">
+    <!--assets-->
+    <a-assets>
+        <video id="v1_v" crossorigin="anonymous"></video>
+        <video id="v2_v" crossorigin="anonymous"></video>
+        <video id="v3_v" crossorigin="anonymous"></video>
+        <video id="v4_v" crossorigin="anonymous"></video>
+        <video id="v5_v" crossorigin="anonymous"></video>
+        <video id="v6_v" crossorigin="anonymous"></video>
+        <video id="v7_v" crossorigin="anonymous"></video>
+        <video id="v8_v" crossorigin="anonymous"></video>
+        <img id="direction" src="image/arrow.png">
+    </a-assets>
 
-<!--camera & cursor-->
-    <a-camera id="camera" camera look-controls  position="0 0.08 0" fov="60">
-      <a-cursor id="cursor"></a-cursor>
-    </a-camera>
+    <!--camera & cursor-->
+    <a-entity look-controls camera id="camera" position ="0 1 0"></a-entity>
 
-<!--360 background-->
-    <a-videosphere id="vr_view" src="#view2" rotation="0 90 0"></a-videosphere>
-    <!-- <a-box src="#sibal" depth=0.02 height="0.1" width="0.1" rotation="0 90 0" position="3 0.08 0"></a-plane> -->
+    <a-videosphere id="vr_view" src="#v2_v" rotation = "0 -90 0"></a-videosphere>
 
-<!--viewpoints--> 
-<a-entity id="cam1" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" material="src:#view1_img; alphaTest:0.6"
-position="-3 0.08 0"></a-entity>
-<a-entity id="cam2" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" material="src:#view2_img; alphaTest:0.6"
-position="0 0.08 0"></a-entity>
-<a-entity id="cam3" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" material="src:#view3_img; alphaTest:0.6"
-position="3 0.08 0"></a-entity>
-<a-entity id="cam4" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" material="src:#view4_img; alphaTest:0.6"
-position="-3 0.08 3.5"></a-entity>
-<a-entity id="cam5" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" material="src:#view5_img; alphaTest:0.6"
-position="3 0.08 3.5"></a-entity>
-    <!-- <a-sphere id="cam1" position="3 0.08 0" src="#view1" radius="0.05"></a-sphere>
-    <a-sphere id="cam2" position="0 0.08 0" src="#view2" radius="0.05"></a-sphere>
-    <a-sphere id="cam3" position="-3 0.08 0"  src="#view3" radius="0.05"></a-sphere>
-    <a-sphere id="cam4" position="3 0.08 3.5"  src="#view4" radius="0.05"></a-sphere>
-    <a-sphere id="cam5" position="-3 0.08 3.5"  src="#view5" radius="0.05"></a-sphere> -->
+    <a-entity id = "arrow" geometry="primitive:cylinder; height:0.03; radius:0.25" material="src:#direction; alphaTest:0.55; opacity:0.8" rotation="0 0 30" position = "3 1.5 0" visible = "false"></a-entity>
 
+    <!--viewpoints material="alphaTest:1; opacity:0;"-->
+    <a-entity id="view_sphere"></a-entity>
 </a-scene>
 
 </body>
