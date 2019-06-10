@@ -4,53 +4,36 @@
     <meta charset="UTF-8">
     <title>Title</title>
 
-    <script src="js/dash.all.debug.js"></script>
+    <script src = 'js/dash.all.debug.js'></script>
     <script src="https://aframe.io/releases/0.9.1/aframe.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="./socket.io/socket.io.js"></script>
-    
 </head>
 <body>
-<script src="js/test1.js"></script>
-<script src="js/graph.js"></script>
-<!-- <script src="js/aframe-mss.js"></script> -->
+<script src="js/test3.js"></script>
 
 <a-scene main raycaster cursor="rayOrigin: mouse">
-
 <!--assets-->
   <a-assets>
-    <video id="view" src="files/v2/v2_dash.mpd" muted></video>
-    <img id = "direction" src="image/arrow.png">
-    <img id = "empty" src="image/empty.png">
+    <video id="v1_v" crossorigin="anonymous"></video>
+    <video id="v2_v" crossorigin="anonymous"></video>
+    <video id="v3_v" crossorigin="anonymous"></video>
+    <video id="v4_v" crossorigin="anonymous"></video>
+    <video id="v5_v" crossorigin="anonymous"></video>
+    <video id="v6_v" crossorigin="anonymous"></video>
+    <video id="v7_v" crossorigin="anonymous"></video>
+    <video id="v8_v" crossorigin="anonymous"></video>
+    <img id="direction" src="image/arrow.png">
   </a-assets>
-  
 
     <!--camera & cursor-->
-    <a-entity look-controls camera id="camera" position ="0 0.08 0" fov="60">
-        <a-curosr id="cursor"></a-curosr>
-    </a-entity>
+    <a-entity look-controls camera id="camera" position ="0 1 0"></a-entity>
 
-    <!--360 background-->
-    <!--<a-videosphere id="vr_view" rotation="0 90 0"></a-videosphere>-->
-    <!-- <a-box src="#sibal" depth=0.02 height="0.1" width="0.1" rotation="0 90 0" position="3 0.08 0"></a-plane> -->
+    <a-videosphere id="vr_view" src="#v2_v" rotation = "0 -90 0"></a-videosphere>
 
-<a-videosphere id="vr_view" src="#view" rotation="0 90 0"></a-videosphere>
-<!--viewpoints/material="src:#empty; alphaTest:0.55" -->
-<a-entity raycaster = "objects:#view_sphere"></a-entity>
-    <a-entity id="view_sphere" rotation="0 180 0">
-        <a-entity view id="v1" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" position="-3 0.08 0"></a-entity>
-        <a-entity view id="v2" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" position="0 0.08 0"></a-entity>
-        <a-entity view id="v3" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" position="3 0.08 0"></a-entity>
-        <a-entity view id="v4" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" position="-3 0.08 3.5"></a-entity>
-        <a-entity view id="v5" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" position="3 0.08 3.5"></a-entity>
-    </a-entity>
-<a-entity id = "arrow" geometry="primitive:cylinder; height:0.03; radius:0.25" material="src:#direction; alphaTest:0.55; opacity:0.8" rotation="0 0 30" position = "3 1.5 0" visible = "false"></a-entity>
-    <!-- <a-sphere id="cam1" position="3 0.08 0" src="#view1" radius="0.05"></a-sphere>
-    <a-sphere id="cam2" position="0 0.08 0" src="#view2" radius="0.05"></a-sphere>
-    <a-sphere id="cam3" position="-3 0.08 0"  src="#view3" radius="0.05"></a-sphere>
-    <a-sphere id="cam4" position="3 0.08 3.5"  src="#view4" radius="0.05"></a-sphere>
-    <a-sphere id="cam5" position="-3 0.08 3.5"  src="#view5" radius="0.05"></a-sphere> -->
+    <a-entity id = "arrow" geometry="primitive:cylinder; height:0.03; radius:0.25" material="src:#direction; alphaTest:0.55; opacity:0.8" rotation="0 0 30" position = "3 1.5 0" visible = "false"></a-entity>
 
+<!--viewpoints material="alphaTest:1; opacity:0;"-->
+    <a-entity id="view_sphere"></a-entity>
 </a-scene>
 
 </body>
