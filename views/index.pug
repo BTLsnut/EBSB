@@ -2,25 +2,36 @@
 html
     title=title
     script(src='js/dash.all.debug.js')
-    script(src='https://aframe.io/releases/0.9.1/aframe.min.js')
+    script(src='js/aframe.min.js')
+    link(rel="stylesheet" type="text/css" href="stylesheets/style.css")
     script(src='https://code.jquery.com/jquery-3.4.1.min.js')
 body
     //script(type="module" src="js/graph.js")
     script(type="module" src="js/test3.js")
-    a-scene(main="" raycaster="" curosr="rayOrigin: mouse")
-        a-assets
-            video(id="view" crossorigin="anonymous" src="video/v2/v2_dash.mpd")
-            img(id="direction" src="image/arrow.png")
+    a-scene(main="")
+        a-assets(id="asset")
+            video(id="main_view" crossorigin="anonymous" src="files/v2/v2_dash.mpd")
+            video(id="main_view2" crossorigin="anonymous" src="files/v3/v3_dash.mpd")
+            a-asset-item(id="arrow_model", src='models/arrow/arrow.gltf')
 
-        a-entity(cam="" look-controls="" camera="" id="camera" rotation="0 90 0" position="0 0.08 0" fov="60")
-            a-cursor(id="cursor")
+        a-entity(id='arrow'
+            geometry="primitive: box; height: 0.2; width: 0.2"
+            position="0 100 0"
+            scale="0.5 0.5 0.5"
+            rotation="90 0 0"
+            gltf-model='#arrow_model'
+            visible=false)
 
-        a-videosphere(id="vr_view" src="#view" rotation="0 90 0")
-        a-entity(id="arrow" geometry="primitive:cylinder; height:0.03; radius:0.25" material="src:#direction; alphaTest:0.55; opacity:0.8" rotation="0 0 30" position = "3 1.5 0" visible = "false")
+        a-entity(look-controls="enabled: false" camera="" id="camera")
+            a-cursor(id="cursor" cursor="rayOrigin: mouse" raycaster="objects:.moveable")
+                a-entity(id="control" visible="true" class="control")
+                    a-entity(id="play_pause" class="button")
+                    a-entity(id="stop" class="stop")
 
-        a-entity(id="view_sphere" rotation="0 180 0")
-            a-entity(view="" id="v1" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" position="-3 0.08 0")
-            a-entity(view="" id="v2" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" position="0 0.08 0")
-            a-entity(view="" id="v3" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" position="3 0.08 0")
-            a-entity(view="" id="v4" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" position="-3 0.08 3.5")
-            a-entity(view="" id="v5" geometry="primitive: box; width:0.3; height:0.3; depth:0.3" position="3 0.08 3.5")
+        a-videosphere(id="vr_view" rotation="0 270 0" src="#main_view")
+
+        //a-entity(id="arrow" geometry="primitive:cylinder; height:0.03; radius:0.25" material="src:#direction; alphaTest:0.55; opacity:0.8" rotation="0 0 30" position = "3 1.5 0" visible = "false")
+
+        a-entity(id="view_sphere" rotation="0 0 0")
+        a-entity(class='mapCanvas')
+            a-entity(id="minimap" class="mini-map")

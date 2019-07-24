@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
+var fs = require('fs');
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID;
+import '../public/js/mpd_graph'
 
 
 router.post('/upload', function (req, res) {
@@ -26,8 +28,8 @@ router.post('/upload', function (req, res) {
             console.log(this.openedFiles[i])
             /* The file name of the uploaded file */
             var file_name = this.openedFiles[i].name;
-            var split_file = file_name.split('.mp4')
-            var hash = this.openedFiles[i].hash
+            var split_file = file_name.split('.mp4');
+            var hash = this.openedFiles[i].hash;
 
             /* Location where we want to copy the uploaded file */
             var new_location = './files/';
@@ -37,8 +39,8 @@ router.post('/upload', function (req, res) {
             //console.log(this.openedFiles[i]);
             MongoClient.connect('mongodb://117.17.184.60:27017', function (err, client) {
                 assert.equal(null, err);
-                const db = client.db("virtualspace");
-                const collection = db.collection('concert');
+                const db = client.db("multiview");
+                const collection = db.collection('point');
                 console.log(temp_path);
 
                 var final_location = new_location + split_file[0] + '/';
@@ -53,6 +55,7 @@ router.post('/upload', function (req, res) {
                             if (err)
                                 throw err;
                             else {
+                                // extract metadata
                                 exif.metadata(data, function (err, metadata) {
                                     console.log("memory" + JSON.stringify(process.memoryUsage()))
                                     if (err)
@@ -94,6 +97,10 @@ router.post('/upload', function (req, res) {
             });
         }
     });
+});
+
+router.get('/node', function (req, res) {
+
 });
 
 module.exports = router;

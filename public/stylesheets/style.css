@@ -6,3 +6,91 @@ body {
 a {
   color: #00B7FF;
 }
+
+.mapCanvas {
+  border: solid 3px;
+  width: 240px;
+  height: 200px;
+  z-index: 10;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.mapCanvas .mini-map {
+  background: transparent;
+  width: 200px;
+  height: 160px;
+  z-index: 10;
+  position: fixed;
+  top: 0%;
+  left: 0%;
+}
+
+.mini-map .node {
+  background-color: blue;
+  border-radius: 50%;
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  display: none;
+  /*display: inline-block;*/
+}
+
+.mini-map .node.active {
+  background-color: red;
+}
+
+.control {
+  background: transparent;
+  width: 152px;
+  height: 76px;
+  position: fixed;
+  top: 90%;
+  left: 5%;
+  z-index: 10;
+}
+
+.control .button {
+  background: transparent;
+  box-sizing: border-box;
+  width: 76px;
+  height: 76px;
+  top: 50%;
+  left: 50%;
+  position: fixed;
+  border-color: transparent transparent transparent #202020;
+  transition: 100ms all ease;
+  cursor: pointer;
+  border-width: 38px 0 38px 76px;
+  border-style: solid;
+}
+
+.control .button.paused {
+  border-style: double;
+  border-width: 0 0 0 75px;
+}
+.control .button:hover {
+  border-color: transparent transparent transparent #404040;
+}
+
+.control .stop {
+  background: transparent;
+  box-sizing: border-box;
+  width: 50%;
+  height: 100%;
+  top: 0%;
+  left: 60%;
+  position: absolute;
+  border-color: transparent transparent transparent #202020;
+  transition: 100ms all ease;
+  cursor: pointer;
+  border-width: 0 0 0 75px;
+  border-style: solid;
+  display: none;
+}
+
+.control .stop:hover {
+  border-color: transparent transparent transparent #404040;
+}
+
