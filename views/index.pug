@@ -7,7 +7,7 @@ html
     script(src='https://code.jquery.com/jquery-3.4.1.min.js')
 body
     //script(type="module" src="js/graph.js")
-    script(type="module" src="js/test3.js")
+    script(type="module" src="js/main.js")
     a-scene(main="")
         a-assets(id="asset")
             video(id="main_view" crossorigin="anonymous" src="files/v2/v2_dash.mpd")
@@ -35,3 +35,4 @@ body
         a-entity(id="view_sphere" rotation="0 0 0")
         a-entity(class='mapCanvas')
             a-entity(id="minimap" class="mini-map")
+                a-entity(id="m_camera" class="camera")
