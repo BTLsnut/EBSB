@@ -19,7 +19,6 @@ a {
 
 .mapCanvas .mini-map {
   margin: 30px;
-  background: transparent;
   width: 200px;
   height: 160px;
   z-index: 10;
@@ -29,7 +28,7 @@ a {
 }
 
 .mini-map .node {
-  background-color: blue;
+  background-color: #5E5F5E;
   position: absolute;
   width: 10px;
   height: 10px;
@@ -45,11 +44,11 @@ a {
   height: 49px;
   top: 50%;
   left: 50%;
+  margin-left: 5px;
   transform-origin: 0% 0%;
   transform: rotate(45deg);
-  border: 1px solid;
-  border-color: #202020 transparent transparent #202020;
   display: none;
+  background:linear-gradient(0.378turn, #F0CA0B, transparent 50% )
 }
 /*.mini-map .node#m_camera {*/
 /*  position: absolute;*/
@@ -64,12 +63,12 @@ a {
 /*  display: none;*/
 /*}*/
 .mini-map .node.active {
-  background-color: red;
+  background-color:#D54472;
 }
 
 .control {
   background: transparent;
-  width: 152px;
+  width: 110px;
   height: 76px;
   position: fixed;
   top: 90%;
@@ -80,8 +79,8 @@ a {
 .control .button {
   background: transparent;
   box-sizing: border-box;
-  width: 76px;
-  height: 76px;
+  width: 40px;
+  height: 40px;
   top: 50%;
   left: 50%;
   position: fixed;
@@ -94,7 +93,7 @@ a {
 
 .control .button.paused {
   border-style: double;
-  border-width: 0 0 0 75px;
+  border-width: 0 0 0 40px;
 }
 .control .button:hover {
   border-color: transparent transparent transparent #404040;
@@ -104,14 +103,14 @@ a {
   background: transparent;
   box-sizing: border-box;
   width: 50%;
-  height: 100%;
+  height: 50%;
   top: 0%;
   left: 60%;
   position: absolute;
   border-color: transparent transparent transparent #202020;
   transition: 100ms all ease;
   cursor: pointer;
-  border-width: 0 0 0 75px;
+  border-width: 0 0 0 40px;
   border-style: solid;
   display: none;
 }

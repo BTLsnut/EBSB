@@ -3,7 +3,7 @@ html
     title=title
     script(src='js/dash.all.debug.js')
     script(src='js/aframe.min.js')
-    link(rel="stylesheet" type="text/css" href="stylesheets/style2.css")
+    link(rel="stylesheet" type="text/css" href="stylesheets/style.css")
     script(src='https://code.jquery.com/jquery-3.4.1.min.js')
 body
     //script(type="module" src="js/graph.js")
@@ -30,7 +30,6 @@ body
 
         a-videosphere(id="vr_view" rotation="0 270 0" src="#main_view")
 
-        //a-entity(id="arrow" geometry="primitive:cylinder; height:0.03; radius:0.25" material="src:#direction; alphaTest:0.55; opacity:0.8" rotation="0 0 30" position = "3 1.5 0" visible = "false")
 
         a-entity(id="view_sphere" rotation="0 0 0")
         a-entity(class='mapCanvas')

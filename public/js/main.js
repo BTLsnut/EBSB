@@ -20,7 +20,7 @@ window.addEventListener('mousewheel', function (e) {
     let cam = document.querySelector('#camera');
     let dd = cam.getAttribute('camera').zoom;
     if (wheel)
-        // wheel down
+    // wheel down
         if (dd > 1)
             cam.setAttribute('camera', {
                 zoom: --dd
@@ -213,8 +213,8 @@ function create_view(data) {
 
         view.setAttribute("id", id);
         view.setAttribute('material', {
-            alphaTest:1,
-            opacity:0
+            alphaTest: 1,
+            opacity: 0
         });
         view.setAttribute('geometry', {
             primitive: 'box',
@@ -224,15 +224,9 @@ function create_view(data) {
         });
         view.setAttribute('position', data[id].pos);
         view.setAttribute('scale', {
-            x: 0.5,
-            y: 0.5,
-            z: 0.5
-        });
-        view.setAttribute('animation', {
-            property: 'rotation',
-            to: '0 360 0',
-            loop: true,
-            dur: 10000
+            x: 1.5,
+            y: 1.5,
+            z: 1.5
         });
 
         view.addEventListener('click', view_click_handler(data[id]));
@@ -332,20 +326,31 @@ function view_mouseover_hanlder(id) {
         let pos = view.getAttribute('position');
         let moveable = view.classList.contains("moveable");
         let arrow = document.querySelector('#arrow');
+        let x = pos.x - cur_node.pos.x;
+        let z = pos.z - cur_node.pos.z;
+        let position = {
+            x: 70,
+            y: Math.atan2(x, z) * (180 / Math.PI),
+            z: 90
+        };
+        pos.y = 0.5;
+        let to_pos = {
+            x: pos.x + x / 3,
+            y: pos.y,
+            z: pos.z + z / 3
+        };
         arrow.setAttribute('position', pos);
-        arrow.setAttribute('rotation', {
-            x: 0,
-            y: -90,
-            z: 50
-        });
-        //
-        // arrow.setAttribute('animation', {
-        //     property: "rotation",
-        //     to: "0 0 0",
-        //     loop: true,
-        //     dur: 1000
-        // });
+        arrow.setAttribute('rotation', position);
         arrow.setAttribute('visible', "true");
+        arrow.setAttribute('animation', {
+            property: 'position',
+            from: pos.x + " " + pos.y + " " + pos.z,
+            to: pos_to_string(to_pos),
+            dur: 1000,
+            loop: true
+        });
+        console.log("from: " + pos_to_string(pos));
+        console.log("to: " + pos_to_string(to_pos));
         console.log(id + "의 위치: ("
             + pos.x + ", " + pos.y + ", " + pos.z + ") "
             + " moveable: " + moveable);
@@ -357,10 +362,6 @@ function view_mouseleave_handler(id) {
         let arrow = document.querySelector('#arrow');
         arrow.setAttribute('visible', "false");
     }
-}
-
-function pos_to_string(obj) {
-    return "(" + obj.x + ", " + obj.y + ", " + obj.z + ")";
 }
 
 function node_click_handler(node) {
@@ -461,4 +462,8 @@ export default class Node {
         }
         return tmp;
     }
+}
+
+function pos_to_string(pos) {
+    return pos.x + " " + pos.y + " " + pos.z;
 }
