@@ -9,12 +9,29 @@ const deg = 45;
 const AFRAME_WIDTH = 8;
 const AFRAME_HEIGHT = 4;
 
-document.onkeydown = function (evt) {
+window.addEventListener('keydown', function (evt) {
     if (window.event.keyCode === 32) {
         $("#play_pause").trigger('click');
     }
-};
+});
 
+window.addEventListener('mousewheel', function (e) {
+    let wheel = e.wheelDelta < 0;
+    let cam = document.querySelector('#camera');
+    let dd = cam.getAttribute('camera').zoom;
+    if (wheel)
+        // wheel down
+        if (dd > 1)
+            cam.setAttribute('camera', {
+                zoom: --dd
+            });
+        else
+        // wheel up
+        if (dd < 5)
+            cam.setAttribute('camera', {
+                zoom: ++dd
+            });
+});
 
 function add_moveable(id_list) {
     return function () {
@@ -57,7 +74,7 @@ AFRAME.registerComponent('main', {
             yaw += 360;
 
         yaw = deg - yaw;
-        document.querySelector('#m_camera').style.transform = "rotate(" + yaw +"deg)";
+        document.querySelector('#m_camera').style.transform = "rotate(" + yaw + "deg)";
     }
 });
 
@@ -196,9 +213,8 @@ function create_view(data) {
 
         view.setAttribute("id", id);
         view.setAttribute('material', {
-            alphaTest: 1,
-            opacity: 1,
-            color: 'black'
+            alphaTest:1,
+            opacity:0
         });
         view.setAttribute('geometry', {
             primitive: 'box',
@@ -273,6 +289,7 @@ function calibrate_camera(state) {
         });
     }
 }
+
 function view_click_handler(node) {
     return function () {
         if (cur_node.cur !== node.id) {
@@ -295,7 +312,7 @@ function view_click_handler(node) {
 
             calibrate_camera(cur_node);
 
-            if(cur_node.cur !== cur_node.prev) {
+            if (cur_node.cur !== cur_node.prev) {
                 let current = $("#m_" + cur_node.cur);
                 current.addClass('active');
                 $("#m_" + cur_node.prev).removeClass('active');
@@ -316,11 +333,17 @@ function view_mouseover_hanlder(id) {
         let moveable = view.classList.contains("moveable");
         let arrow = document.querySelector('#arrow');
         arrow.setAttribute('position', pos);
+        arrow.setAttribute('rotation', {
+            x: 0,
+            y: -90,
+            z: 50
+        });
+        //
         // arrow.setAttribute('animation', {
-        //     property: "position",
-        //     to: "0 0 3",
+        //     property: "rotation",
+        //     to: "0 0 0",
         //     loop: true,
-        //     dur: 100
+        //     dur: 1000
         // });
         arrow.setAttribute('visible', "true");
         console.log(id + "의 위치: ("
@@ -376,7 +399,6 @@ function create_minimap(node_link) {
         map_canvas.appendChild(m_node);
     });
 }
-
 
 
 export default class Node {
