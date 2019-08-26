@@ -2,10 +2,13 @@ var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
 var path = require('path');
+
 var indexRouter = require('./routes/index');
 var transferRouter = require('./routes/transfer');
 var graph = require('./routes/graph');
 var arrow = require('./routes/arrow');
+var mapRouter = require('./routes/map');
+
 var port = 8080;
 
 // view engine setup
@@ -16,6 +19,8 @@ app.use(express.static(path.join(__dirname, '/public')));
 
 app.use('/', indexRouter);
 app.use('/transfer', transferRouter);
+app.use('/map', mapRouter);
+
 app.use('/graph', graph);
 app.use('/arrow', arrow);
 
