@@ -5,6 +5,8 @@ var video_dom = null;
 var t = 0;
 var can_play = true;
 var start_state = false;
+var viewpoint_compensation = {viewpoint: 0, t: 0};
+
 const deg = 45;
 const AFRAME_WIDTH = 8;
 const AFRAME_HEIGHT = 4;
@@ -19,18 +21,19 @@ window.addEventListener('mousewheel', function (e) {
     let wheel = e.wheelDelta < 0;
     let cam = document.querySelector('#camera');
     let dd = cam.getAttribute('camera').zoom;
-    if (wheel)
-    // wheel down
+    if (wheel) {
+        // wheel down
         if (dd > 1)
             cam.setAttribute('camera', {
                 zoom: --dd
             });
-        else
+    } else {
         // wheel up
-        if (dd < 5)
+    if (dd < 5)
             cam.setAttribute('camera', {
                 zoom: ++dd
             });
+    }
 });
 
 function add_moveable(id_list) {
@@ -65,6 +68,7 @@ AFRAME.registerComponent('main', {
         });
     },
     tick: function (d, dt) {
+        // console.log($("#camera").attr('rotation'));
         let yaw = $("#camera").attr('rotation').y;
 
         if (yaw >= 360)
@@ -73,8 +77,26 @@ AFRAME.registerComponent('main', {
         if (yaw < -360)
             yaw += 360;
 
-        yaw = deg - yaw;
-        document.querySelector('#m_camera').style.transform = "rotate(" + yaw + "deg)";
+        let minimap_yaw = deg - yaw;
+
+        let diff = viewpoint_compensation.viewpoint - yaw > 0 ?
+            viewpoint_compensation.viewpoint - yaw : yaw - viewpoint_compensation.viewpoint;
+        viewpoint_compensation.t += dt;
+
+
+        if (viewpoint_compensation.t >= 2000) {
+            if (diff >= 30) {
+                console.log("diff is " + diff);
+                viewpoint_compensation.viewpoint = yaw;
+            }
+            viewpoint_compensation.t = 0;
+            console.log("update viewpoint com: " + viewpoint_compensation.viewpoint);
+        }
+
+        // console.log(viewpoint_compensation.viewpoint);
+
+
+        document.querySelector('#m_camera').style.transform = "rotate(" + minimap_yaw + "deg)";
     }
 });
 
@@ -123,7 +145,7 @@ function requested_data_handler(result) {
         node_link[name] = new Node(item);
     });
 
-    const MIN_DISTANCE = 3;
+    const MIN_DISTANCE = 10;
     for (let i in node_link) {
         for (let j in node_link) {
             if (i !== j)
@@ -300,10 +322,12 @@ function view_click_handler(node) {
 
             main_player.getVideoElement().currentTime = t;
 
+            // let tan = (Math.atan2(node.pos.z - cur_node.pos.z, node.pos.x - cur_node.pos.x) * (180 / Math.PI));
+            // console.log("tan: " + tan);
+
             current_state_update(cur_node, node);
             add_moveable(moveable).call();
             update_player(moveable, preload_player).call();
-
             calibrate_camera(cur_node);
 
             if (cur_node.cur !== cur_node.prev) {
@@ -349,8 +373,6 @@ function view_mouseover_hanlder(id) {
             dur: 1000,
             loop: true
         });
-        console.log("from: " + pos_to_string(pos));
-        console.log("to: " + pos_to_string(to_pos));
         console.log(id + "의 위치: ("
             + pos.x + ", " + pos.y + ", " + pos.z + ") "
             + " moveable: " + moveable);
