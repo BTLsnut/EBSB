@@ -37,7 +37,7 @@ router.post('/upload', function (req, res) {
             console.log("temp_path == ", temp_path);
             console.log("file_name == ", file_name);
             //console.log(this.openedFiles[i]);
-            MongoClient.connect('mongodb://117.17.184.60:27017', function (err, client) {
+            MongoClient.connect('mongodb://117.17.184.16:27017', function (err, client) {
                 assert.equal(null, err);
                 const db = client.db("multiview");
                 const collection = db.collection('point');

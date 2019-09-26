@@ -5,7 +5,7 @@ const ObjectID = require('mongodb').ObjectID;
 
 // DB에 연결해서 데이터 가지고오기
 router.post('/', function(req, res, next) {
-    MongoClient.connect('mongodb://117.17.184.60:27017', function (err, client) {
+    MongoClient.connect('mongodb://localhost:27017', function (err, client) {
         if (err) throw err;
         const db = client.db("multiview");
         const collection = db.collection("point");
@@ -16,6 +16,5 @@ router.post('/', function(req, res, next) {
         });
     });
 });
-
 
 module.exports = router;

@@ -11,6 +11,9 @@ const deg = 45;
 const AFRAME_WIDTH = 8;
 const AFRAME_HEIGHT = 4;
 
+const REQUEST_AJAX = 1;
+const REQUEST_JSON = 2;
+
 window.addEventListener('keydown', function (evt) {
     if (window.event.keyCode === 32) {
         $("#play_pause").trigger('click');
@@ -59,7 +62,7 @@ AFRAME.registerComponent('main', {
     init: function () {
         let cursor = $("#play_pause");
         cursor.click(cursor_click_handler);
-        request_data().then(requested_data_handler);
+        request_data(REQUEST_JSON).then(requested_data_handler);
         let cam = document.querySelector('#camera');
         cam.setAttribute('rotation', {
             x: 0,
@@ -78,23 +81,6 @@ AFRAME.registerComponent('main', {
             yaw += 360;
 
         let minimap_yaw = deg - yaw;
-
-        let diff = viewpoint_compensation.viewpoint - yaw > 0 ?
-            viewpoint_compensation.viewpoint - yaw : yaw - viewpoint_compensation.viewpoint;
-        viewpoint_compensation.t += dt;
-
-
-        if (viewpoint_compensation.t >= 2000) {
-            if (diff >= 30) {
-                console.log("diff is " + diff);
-                viewpoint_compensation.viewpoint = yaw;
-            }
-            viewpoint_compensation.t = 0;
-            console.log("update viewpoint com: " + viewpoint_compensation.viewpoint);
-        }
-
-        // console.log(viewpoint_compensation.viewpoint);
-
 
         document.querySelector('#m_camera').style.transform = "rotate(" + minimap_yaw + "deg)";
     }
@@ -118,7 +104,7 @@ function cursor_click_handler() {
                 display: "block"
             });
 
-            main_player.play();
+            // TODO PLAY ACTION
             start_state = true;
         }
     } else {
@@ -133,13 +119,14 @@ function cursor_click_handler() {
         $("#stop").css({
             display: "none"
         });
-        main_player.pause();
+        // TODO PAUSE ACTION
         start_state = false;
     }
 }
 
 function requested_data_handler(result) {
     let node_link = [];
+    console.log(result);
     result.forEach(function (item) {
         let name = item.filename.split('.')[0];
         node_link[name] = new Node(item);
@@ -157,66 +144,76 @@ function requested_data_handler(result) {
     create_minimap(node_link);
     create_view(node_link);
 
-    main_player.on('canPlay', function (evt) {
-        can_play = true;
-        if (start_state)
-            main_player.play();
-        console.log('can_play');
-    });
-    main_player.on('playbackPaused', function () {
-        t = main_player.duration() * (main_player.time / 100);
-    });
-    main_player.on('playbackSeeking', function () {
-        console.log('seeking');
-    });
-    main_player.on('playbackSeeked', function (evt) {
-        console.log('seek end');
-    });
-    main_player.on('playbackSeekAsked', function (evt) {
-        console.log('seek asked');
-    });
-    main_player.on('error', function (evt) {
-        console.error(evt);
-    });
-    main_player.on('bufferEmpty', function () {
-        console.log('buffer empty')
-    });
-    main_player.on('bufferLevelStateChange', function () {
-        console.log('buffer level state change');
-    });
-    main_player.on('buffer loaded', function () {
-        console.log('buffer loaded');
-    });
-    main_player.on('playbackEnded', function () {
-        console.log('video end');
-    });
-
 
     let camera = document.querySelector('#camera');
     camera.setAttribute('position', node_link[cur_node.cur].pos);
-
-    video_dom = document.querySelector('#main_view');
-
-    main_player.initialize(video_dom, node_link[cur_node.cur].src, false);
-
-    // preload_seg(node_link);
 }
 
-function request_data() {
-    return new Promise(function (resolve, reject) {
-        $.ajax({
-            url: '/transfer',                //주소
-            dataType: 'json',                  //데이터 형식
-            type: 'POST',                      //전송 타입
-            // data: {'msg': $('#msg').val()},      //데이터를 json 형식, 객체형식으로 전송
-            success: function (result) {          //성공했을 때 함수 인자 값으로 결과 값 나옴
-                resolve(result)
-            },
-            error: function (err) {
-                reject(err)
-            }//function 끝
-        });
+function readTextFile(file, callback) {
+    var rawFile = new XMLHttpRequest();
+    rawFile.overrideMimeType("application/json");
+    rawFile.open("GET", file, true);
+    rawFile.onreadystatechange = function() {
+        if (rawFile.readyState === 4 && rawFile.status == "200") {
+            callback(rawFile.responseText);
+        }
+    };
+    rawFile.send(null);
+}
+
+function calibrate_camera(state) {
+    let camera = document.querySelector('#camera');
+    camera.setAttribute('position', state.pos);
+    camera.setAttribute('rotation', {
+        x: 0,
+        y: 180,
+        z: 0
     });
+
+    // if (cur_node.cur === 'v8') {
+    //     let videosphere = document.querySelector('#vr_view');
+    //     videosphere.setAttribute('rotation', {
+    //         x: 0,
+    //         y: 90,
+    //         z: 0
+    //     });
+    // } else {
+    //     let videosphere = document.querySelector('#vr_view');
+    //     videosphere.setAttribute('rotation', {
+    //         x: 0,
+    //         y: -90,
+    //         z: 0
+    //     });
+    // }
+}
+
+function request_data(REQUEST_CODE) {
+    if (REQUEST_CODE === REQUEST_JSON)
+        return new Promise(function(resolve, reject) {
+            readTextFile("json/multiview.json", function(text){
+                let data = JSON.parse(text);
+                resolve(data);
+            });
+        });
+    else if (REQUEST_CODE === REQUEST_AJAX)
+        return new Promise(function (resolve, reject) {
+            $.ajax({
+                url: '/transfer',                //주소
+                dataType: 'json',                  //데이터 형식
+                type: 'POST',                      //전송 타입
+                // data: {'msg': $('#msg').val()},      //데이터를 json 형식, 객체형식으로 전송
+                success: function (result) {          //성공했을 때 함수 인자 값으로 결과 값 나옴
+                    resolve(result)
+                },
+                error: function (err) {
+                    reject(err)
+                }
+            });
+        });
+    else
+        return new Promise(function (resolve, reject) {
+            reject(Error("invalid request code"))
+        })
 }
 
 function create_view(data) {
@@ -234,10 +231,10 @@ function create_view(data) {
         parent.appendChild(view);
 
         view.setAttribute("id", id);
-        view.setAttribute('material', {
-            alphaTest: 1,
-            opacity: 0
-        });
+        // view.setAttribute('material', {
+        //     alphaTest: 1,
+        //     opacity: 0
+        // });
         view.setAttribute('geometry', {
             primitive: 'box',
             width: 0.5,
@@ -257,55 +254,9 @@ function create_view(data) {
     }
 
     add_moveable(moveable).call();
-    update_player(moveable, preload_player).call();
 }
 
-function update_player(moveable_list, preload_p_list) {
-    return function () {
-        for (let idx in preload_p_list) {
-            if (!moveable_list.includes(idx)) {
-                delete preload_p_list[idx];
-            }
-        }
-
-        for (let idx in moveable_list) {
-            let p = dashjs.MediaPlayer().create();
-            p.initialize(null, moveable_list[idx].src, true);
-            p.preload();
-            preload_p_list[idx] = p;
-        }
-        console.log('preload player update!');
-        console.log(preload_p_list);
-
-    }
-}
-
-function calibrate_camera(state) {
-    let camera = document.querySelector('#camera');
-    camera.setAttribute('position', state.pos);
-    camera.setAttribute('rotation', {
-        x: 0,
-        y: 180,
-        z: 0
-    });
-
-    if (cur_node.cur === 'v8') {
-        let videosphere = document.querySelector('#vr_view');
-        videosphere.setAttribute('rotation', {
-            x: 0,
-            y: 90,
-            z: 0
-        });
-    } else {
-        let videosphere = document.querySelector('#vr_view');
-        videosphere.setAttribute('rotation', {
-            x: 0,
-            y: -90,
-            z: 0
-        });
-    }
-}
-
+// 다른 view를 클릭했을 때 action
 function view_click_handler(node) {
     return function () {
         if (cur_node.cur !== node.id) {
@@ -313,21 +264,10 @@ function view_click_handler(node) {
             console.log("위치 이동: " + pos_to_string(node.pos));
             let moveable = node.get_moveable_node();
 
-            t = main_player.getVideoElement().currentTime;
-
-            if (preload_player[node.id] === undefined)
-                main_player.attachSource(node.src);
-            else
-                main_player.attachSource(preload_player[node.id].getSource());
-
-            main_player.getVideoElement().currentTime = t;
-
-            // let tan = (Math.atan2(node.pos.z - cur_node.pos.z, node.pos.x - cur_node.pos.x) * (180 / Math.PI));
-            // console.log("tan: " + tan);
+            // TODO SYNC
 
             current_state_update(cur_node, node);
             add_moveable(moveable).call();
-            update_player(moveable, preload_player).call();
             calibrate_camera(cur_node);
 
             if (cur_node.cur !== cur_node.prev) {
@@ -344,35 +284,37 @@ function view_click_handler(node) {
     };
 }
 
+// 다른 view에 마우스를 올렸을 때 action
 function view_mouseover_hanlder(id) {
     return function () {
         let view = document.getElementById(id);
         let pos = view.getAttribute('position');
-        let moveable = view.classList.contains("moveable");
-        let arrow = document.querySelector('#arrow');
-        let x = pos.x - cur_node.pos.x;
-        let z = pos.z - cur_node.pos.z;
-        let position = {
-            x: 70,
-            y: Math.atan2(x, z) * (180 / Math.PI),
-            z: 90
-        };
         pos.y = 0.5;
-        let to_pos = {
-            x: pos.x + x / 3,
-            y: pos.y,
-            z: pos.z + z / 3
-        };
-        arrow.setAttribute('position', pos);
-        arrow.setAttribute('rotation', position);
-        arrow.setAttribute('visible', "true");
-        arrow.setAttribute('animation', {
-            property: 'position',
-            from: pos.x + " " + pos.y + " " + pos.z,
-            to: pos_to_string(to_pos),
-            dur: 1000,
-            loop: true
-        });
+        let moveable = view.classList.contains("moveable");
+        // let arrow = document.querySelector('#arrow');
+        // let x = pos.x - cur_node.pos.x;
+        // let z = pos.z - cur_node.pos.z;
+        // let position = {
+        //     x: 70,
+        //     y: Math.atan2(x, z) * (180 / Math.PI),
+        //     z: 90
+        // };
+        // let to_pos = {
+        //     x: pos.x + x / 3,
+        //     y: pos.y,
+        //     z: pos.z + z / 3
+        // };
+        // arrow animation 및 attribute
+        // arrow.setAttribute('position', pos);
+        // arrow.setAttribute('rotation', position);
+        // arrow.setAttribute('visible', "true");
+        // arrow.setAttribute('animation', {
+        //     property: 'position',
+        //     from: pos.x + " " + pos.y + " " + pos.z,
+        //     to: pos_to_string(to_pos),
+        //     dur: 1000,
+        //     loop: true
+        // });
         console.log(id + "의 위치: ("
             + pos.x + ", " + pos.y + ", " + pos.z + ") "
             + " moveable: " + moveable);
@@ -381,6 +323,10 @@ function view_mouseover_hanlder(id) {
 
 function view_mouseleave_handler(id) {
     return function () {
+        let view = document.getElementById(id);
+        let pos = view.getAttribute('position');
+        pos.y = 1;
+
         let arrow = document.querySelector('#arrow');
         arrow.setAttribute('visible', "false");
     }
@@ -390,9 +336,8 @@ function node_click_handler(node) {
     return view_click_handler(node)
 }
 
+// 미니맵 만드는 function -- 현재 위치를 기반으로 만듦
 function create_minimap(node_link) {
-    console.log(node_link);
-
     let map_canvas = document.querySelector('#minimap');
     Object.values(node_link).forEach(function (node) {
         let m_node = document.createElement('a-entity');
@@ -421,9 +366,10 @@ function create_minimap(node_link) {
         m_node.style.display = "inline-block";
         map_canvas.appendChild(m_node);
     });
+    console.log('minimap created');
 }
 
-
+// view 간의 관계를 설정하기 위한 class
 export default class Node {
     constructor(data) {
         this.pos = data.metadata.pos;

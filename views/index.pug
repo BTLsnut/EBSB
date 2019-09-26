@@ -6,12 +6,10 @@ html
     link(rel="stylesheet" type="text/css" href="stylesheets/style.css")
     script(src='https://code.jquery.com/jquery-3.4.1.min.js')
 body
-    //script(type="module" src="js/graph.js")
+    script(type="text/javascript" src="json/multiview.json")
     script(type="module" src="js/main.js")
     a-scene(main="")
         a-assets(id="asset")
-            video(id="main_view" crossorigin="anonymous" src="files/v2/v2_dash.mpd")
-            video(id="main_view2" crossorigin="anonymous" src="files/v3/v3_dash.mpd")
             a-asset-item(id="arrow_model", src='models/arrow/arrow.gltf')
 
         a-entity(id='arrow'
@@ -28,7 +26,6 @@ body
                     a-entity(id="play_pause" class="button")
                     a-entity(id="stop" class="stop")
 
-        a-videosphere(id="vr_view" rotation="0 270 0" src="#main_view")
 
 
         a-entity(id="view_sphere" rotation="0 0 0")
