@@ -99,8 +99,4 @@ router.post('/upload', function (req, res) {
     });
 });
 
-router.get('/node', function (req, res) {
-
-});
-
 module.exports = router;

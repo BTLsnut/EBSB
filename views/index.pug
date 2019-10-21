@@ -8,10 +8,9 @@ html
 body
     //script(type="module" src="js/graph.js")
     script(type="module" src="js/main.js")
-    a-scene(main="")
+    a-scene(main=position)
         a-assets(id="asset")
-            video(id="main_view" crossorigin="anonymous" src="files/v2/v2_dash.mpd")
-            video(id="main_view2" crossorigin="anonymous" src="files/v3/v3_dash.mpd")
+            video(id="main_view" crossorigin="anonymous")
             a-asset-item(id="arrow_model", src='models/arrow/arrow.gltf')
 
         a-entity(id='arrow'

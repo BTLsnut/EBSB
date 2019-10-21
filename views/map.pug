@@ -1,11 +1,25 @@
-//extends layout
-html(lang="en")
-head
-    meta(charset="UTF-8")
-    mata(http-equiv="X-UA-Compatible" content="IE=edge")
-    meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no")
-    title=title
-    script(type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=58hi2e6fgz")
-    script(src="js/map.js")
-body
-   div(id="map")
+doctype html
+html
+    head
+        title=title
+        meta(name="viewport" content="initial-scale=1.0")
+        meta(charset="utf-8")
+        // Always set the map height explicitly to define the size of the div
+            element that contains the map.
+        style().
+            #map {
+                height: 100%;
+            }
+
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        //Optional: Makes the sample page fill the window.
+        body
+            div(id="map")
+        script(src="js/map.js")
+        script(src='https://code.jquery.com/jquery-3.4.1.min.js')
+        script(src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDWSavo3_V1UlEEq_b7foQcFXdajduoIc&callback=initMap"
+            async defer)

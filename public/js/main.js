@@ -29,7 +29,7 @@ window.addEventListener('mousewheel', function (e) {
             });
     } else {
         // wheel up
-    if (dd < 5)
+        if (dd < 5)
             cam.setAttribute('camera', {
                 zoom: ++dd
             });
@@ -57,9 +57,10 @@ function current_state_update(state, node) {
 
 AFRAME.registerComponent('main', {
     init: function () {
+        let position = this.data;
         let cursor = $("#play_pause");
         cursor.click(cursor_click_handler);
-        request_data().then(requested_data_handler);
+        request_data(position).then(requested_data_handler);
         let cam = document.querySelector('#camera');
         cam.setAttribute('rotation', {
             x: 0,
@@ -154,8 +155,8 @@ function requested_data_handler(result) {
     }
 
     console.log(node_link);
-    create_minimap(node_link);
-    create_view(node_link);
+    create_minimap(node_link, result[result.length / 2]);
+    create_view(node_link, result[result.length / 2]);
 
     main_player.on('canPlay', function (evt) {
         can_play = true;
@@ -202,12 +203,13 @@ function requested_data_handler(result) {
     // preload_seg(node_link);
 }
 
-function request_data() {
+function request_data(position) {
     return new Promise(function (resolve, reject) {
         $.ajax({
             url: '/transfer',                //주소
             dataType: 'json',                  //데이터 형식
             type: 'POST',                      //전송 타입
+            data: {position: position},
             // data: {'msg': $('#msg').val()},      //데이터를 json 형식, 객체형식으로 전송
             success: function (result) {          //성공했을 때 함수 인자 값으로 결과 값 나옴
                 resolve(result)
@@ -219,8 +221,8 @@ function request_data() {
     });
 }
 
-function create_view(data) {
-    let initial_view_id = 'v2';
+function create_view(data, initial) {
+    let initial_view_id = initial.fileId;
     let moveable = data[initial_view_id].get_moveable_node();
 
     cur_node.cur = initial_view_id;
@@ -390,7 +392,7 @@ function node_click_handler(node) {
     return view_click_handler(node)
 }
 
-function create_minimap(node_link) {
+function create_minimap(node_link ,initial) {
     console.log(node_link);
 
     let map_canvas = document.querySelector('#minimap');
@@ -407,7 +409,7 @@ function create_minimap(node_link) {
 
         m_node.className = 'node';
 
-        if (node.id === 'v2') {
+        if (node.id === initial.fileId) {
             m_node.classList.add('active');
             $('#m_camera').css({
                 top: css_height,
