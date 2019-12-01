@@ -1,7 +1,7 @@
 //extends layout
 html
     title=title
-    script(src='js/dash.all.debug.js')
+    script(src='https://cdn.dashjs.org/latest/dash.all.min.js')
     script(src='js/aframe.min.js')
     link(rel="stylesheet" type="text/css" href="stylesheets/style.css")
     script(src='https://code.jquery.com/jquery-3.4.1.min.js')
@@ -21,7 +21,7 @@ body
             gltf-model='#arrow_model'
             visible=false)
 
-        a-entity(look-controls="enabled: false" camera="zoom: 1" id="camera")
+        a-entity(look-controls="enabled: false" camera="zoom: 1" id="camera", rotation="0 180 0")
             a-cursor(id="cursor" cursor="rayOrigin: mouse" raycaster="objects:.moveable")
                 a-entity(id="control" visible="true" class="control")
                     a-entity(id="play_pause" class="button")
