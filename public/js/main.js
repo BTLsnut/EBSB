@@ -1,12 +1,12 @@
 var preload_player = [];
 var main_player = dashjs.MediaPlayer().create();
-var cur_node = null;
+var cur_node = {};
 var video_dom = null;
 var t = 0;
 var can_play = true;
 var start_state = false;
 var viewpoint_compensation = {viewpoint: 0, t: 0};
-var target_pos = {};
+
 const deg = 45;
 const AFRAME_WIDTH = 8;
 const AFRAME_HEIGHT = 4;
@@ -57,39 +57,61 @@ function current_state_update(state, node) {
 
 AFRAME.registerComponent('main', {
     init: function () {
-        let camera = document.querySelector('#camera');
         let position = this.data;
         let cursor = $("#play_pause");
+
+        let videosphere = document.querySelector('#vr_view');
+
+        if (position === 'seoultech') {
+            videosphere.setAttribute('rotation', {x:0, y: 270, z: 0})
+        } else if (position === 'hangkong') {
+            videosphere.setAttribute('rotation', {x:0, y: -45, z: 0})
+        } else {
+            throw Error('Not Implement Error')
+        }
+
+
         cursor.click(cursor_click_handler);
         request_data(position).then(requested_data_handler);
+        let cam = document.querySelector('#camera');
+        cam.setAttribute('rotation', {
+            x: 0,
+            y: -180,
+            z: 0
+        });
     },
     tick: function (d, dt) {
-
-        let camera_rotation= $("#camera").attr('rotation');
         // console.log($("#camera").attr('rotation'));
-        let yaw = camera_rotation.y;
+        let yaw = $("#camera").attr('rotation').y;
+
         if (yaw >= 360)
             yaw -= 360;
+
         if (yaw < -360)
             yaw += 360;
-        let minimap_yaw = deg - yaw;  // 바라보고 있는 방향
-        document.querySelector('#m_camera').style.transform = "rotate(" + minimap_yaw + "deg)";
 
-        if (cur_node !== null) {
-            let diff = Math.abs(viewpoint_compensation.viewpoint - yaw);
-            viewpoint_compensation.t += dt;
+        let minimap_yaw = deg - yaw;
 
-            if (viewpoint_compensation.t >= 2000) {
-                if (diff >= 30) {
-                    console.log("diff is " + diff);
-                    viewpoint_compensation.viewpoint = yaw;
-                    let id = cur_node.cur;
-                    target_pos[id] = {rotation: viewpoint_compensation.viewpoint, pos: cur_node.pos};
-                }
-                viewpoint_compensation.t = 0;
-                console.log("update viewpoint com: " + viewpoint_compensation.viewpoint);
+        let diff = viewpoint_compensation.viewpoint - yaw > 0 ?
+            viewpoint_compensation.viewpoint - yaw : yaw - viewpoint_compensation.viewpoint;
+        viewpoint_compensation.t += dt;
+        if (viewpoint_compensation.t >= 2000) {
+            if (diff >= 30) {
+                console.log("diff is " + diff);
+                viewpoint_compensation.viewpoint = yaw;
             }
+            viewpoint_compensation.t = 0;
+            console.log("update viewpoint com: " + viewpoint_compensation.viewpoint);
         }
+        let pos = this.data;
+        if (pos === 'seoultech') {
+            document.querySelector('#m_camera').style.transform = "rotate(" + minimap_yaw + "deg)";
+        } else if (pos === 'hangkong') {
+            document.querySelector('#m_camera').style.transform = "rotate(" + (minimap_yaw + 180) + "deg)";
+        } else {
+            throw Error('Not Implement error')
+        }
+        // console.log(viewpoint_compensation.viewpoint);
     }
 });
 
@@ -129,7 +151,6 @@ function cursor_click_handler() {
         main_player.pause();
         start_state = false;
     }
-    console.log(document.querySelector('#camera').getAttribute('rotation'));
 }
 
 function requested_data_handler(result) {
@@ -150,18 +171,52 @@ function requested_data_handler(result) {
     console.log(node_link);
     create_minimap(node_link, result[result.length / 2]);
     create_view(node_link, result[result.length / 2]);
-
+    main_player.updateSettings({
+        debug: {
+            logLevel: dashjs.Debug.LOG_LEVEL_INFO
+        },
+        abr: {
+            maxBitrate: {video: 1000}
+        },
+        streaming: {
+            bufferToKeep : 0,
+            bufferPruningInterval: 5,
+            cacheLoadThresholds: {video:5, audio:5},
+            lastMediaSettingsCachingInfo: {enabled: false}
+        },
+        audioVideo: {
+            audio:false
+        }
+        // streaming: {
+        //     lastBitrateCachingInfo: {enabled: false},
+        //     cacheLoadThresholds: {audio: 50},
+        //     retryIntervals: {
+        //         MPD: 500,
+        //         XLinkExpansion: 500,
+        //         InitializationSegment: 3000,
+        //         IndexSegment: 3000,
+        //         MediaSegment: 3000,
+        //         BitstreamSwitchingSegment: 3000,
+        //         other: 3000
+        //     },
+        // }
+    });
     main_player.on('canPlay', function (evt) {
         can_play = true;
         if (start_state)
             main_player.play();
+
         console.log('can_play');
-        let camera = document.querySelector('#camera').getAttribute('rotation');
-        camera.y = viewpoint_compensation.viewpoint
-        document.querySelector('#camera').setAttribute('rotation', camera);
+    });
+    main_player.on('streamInitialized', function () {
+        console.log('stream init');
+        // main_player.getVideoElement().currentTime = t;
+    });
+    main_player.on('streamTeardownComplete', function () {
+        console.log('stream teardown complete')
     });
     main_player.on('playbackPaused', function () {
-        t = main_player.duration() * (main_player.time / 100);
+        // t = main_player.duration() * (main_player.time / 100);
     });
     main_player.on('playbackSeeking', function () {
         console.log('seeking');
@@ -176,24 +231,30 @@ function requested_data_handler(result) {
         console.error(evt);
     });
     main_player.on('bufferEmpty', function () {
-        console.log('buffer empty')
+        console.log('buffer empty');
     });
     main_player.on('bufferLevelStateChange', function () {
         console.log('buffer level state change');
     });
-    main_player.on('bufferLoaded', function () {
+    main_player.on('buffer loaded', function () {
         console.log('buffer loaded');
     });
     main_player.on('playbackEnded', function () {
         console.log('video end');
     });
-    main_player.on('streamTeardownComplete', function() {
-       console.log('player reset')
+    main_player.on('manifestLoaded', function () {
+        console.log('manifest loaded');
+    });
+    main_player.on('periodSwitchComplete', function () {
+        console.log('preriod switch complete');
+    });
+    main_player.on('periodSwitchStarted', function () {
+        console.log('period switch started')
     });
 
     let camera = document.querySelector('#camera');
     camera.setAttribute('position', node_link[cur_node.cur].pos);
-    camera.setAttribute('rotation',{x:0, y:180, z: 0});
+
     video_dom = document.querySelector('#main_view');
 
     main_player.initialize(video_dom, node_link[cur_node.cur].src, false);
@@ -222,7 +283,7 @@ function request_data(position) {
 function create_view(data, initial) {
     let initial_view_id = initial.fileId;
     let moveable = data[initial_view_id].get_moveable_node();
-    cur_node = {};
+
     cur_node.cur = initial_view_id;
     cur_node.prev = null;
     cur_node.pos = data[initial_view_id].pos;
@@ -257,7 +318,7 @@ function create_view(data, initial) {
     }
 
     add_moveable(moveable).call();
-    update_player(moveable, preload_player).call();
+    // update_player(moveable, preload_player).call();
 }
 
 function update_player(moveable_list, preload_p_list) {
@@ -271,7 +332,7 @@ function update_player(moveable_list, preload_p_list) {
         for (let idx in moveable_list) {
             let p = dashjs.MediaPlayer().create();
             p.initialize(null, moveable_list[idx].src, true);
-            p.preload();
+            // p.preload();
             preload_p_list[idx] = p;
         }
         console.log('preload player update!');
@@ -283,58 +344,49 @@ function update_player(moveable_list, preload_p_list) {
 function calibrate_camera(state) {
     let camera = document.querySelector('#camera');
     camera.setAttribute('position', state.pos);
+    camera.setAttribute('rotation', {
+        x: 0,
+        y: 180,
+        z: 0
+    });
 
-    if (cur_node.cur === 'v8') {
-        let videosphere = document.querySelector('#vr_view');
-        videosphere.setAttribute('rotation', {
-            x: 0,
-            y: 90,
-            z: 0
-        });
-    } else {
-        let videosphere = document.querySelector('#vr_view');
-        videosphere.setAttribute('rotation', {
-            x: 0,
-            y: -90,
-            z: 0
-        });
-    }
-    let curr_rotation = camera.getAttribute('rotation');
-    console.log(curr_rotation, viewpoint_compensation.viewpoint);
-    curr_rotation.y = viewpoint_compensation.viewpoint;
-    console.log(curr_rotation);
-    camera.setAttribute('rotation', curr_rotation);
-    console.log(camera.getAttribute('rotation'));
+    // if (cur_node.cur === 'v8') {
+    //     let videosphere = document.querySelector('#vr_view');
+    //     videosphere.setAttribute('rotation', {
+    //         x: 0,
+    //         y: 90,
+    //         z: 0
+    //     });
+    // } else {
+    //     let videosphere = document.querySelector('#vr_view');
+    //     videosphere.setAttribute('rotation', {
+    //         x: 0,
+    //         y: -90,
+    //         z: 0
+    //     });
+    // }
 }
 
 function view_click_handler(node) {
     return function () {
         if (cur_node.cur !== node.id) {
             console.log(node);
-            console.log("위치 이동: " + pos_to_string(node.pos));
+            t = main_player.getVideoElement().currentTime;
             let moveable = node.get_moveable_node();
+            // if (preload_player[node.id] === undefined)
+            main_player.attachSource(node.src);
+            // else
+            //     main_player.attachSource(preload_player[node.id].getSource());
+            main_player.getVideoElement().currentTime = t;
 
-            let tmp_duration = main_player.duration();
-
-            if (preload_player[node.id] === undefined) {
-                main_player.attachSource(node.src);
-            }
-            else {
-                video_dom = document.querySelector('#main_view');
-                main_player.reset();
-                main_player.attachView(video_dom);
-                main_player.attachSource(preload_player[node.id].getSource());
-            }
-
-            main_player.seek(tmp_duration);
-            let tan = (Math.atan2(node.pos.z - cur_node.pos.z, node.pos.x - cur_node.pos.x) * (180 / Math.PI));
-            console.log("atan: " + atan);
+            // let tan = (Math.atan2(node.pos.z - cur_node.pos.z, node.pos.x - cur_node.pos.x) * (180 / Math.PI));
+            // console.log("tan: " + tan);
 
             current_state_update(cur_node, node);
             add_moveable(moveable).call();
-            update_player(moveable, preload_player).call();
+            // update_player(moveable, preload_player).call();
             calibrate_camera(cur_node);
-            console.log("atan: ", Math.atan(node.pos));
+
             if (cur_node.cur !== cur_node.prev) {
                 let current = $("#m_" + cur_node.cur);
                 current.addClass('active');
@@ -491,11 +543,6 @@ export default class Node {
     }
 }
 
-function find_target_pox(target_list) {
-    // atan2 --> x값, z값
-    let tan = (Math.atan2(node.pos.z - cur_node.pos.z, node.pos.x - cur_node.pos.x) * (180 / Math.PI));
-
-}
 function pos_to_string(pos) {
     return pos.x + " " + pos.y + " " + pos.z;
 }
