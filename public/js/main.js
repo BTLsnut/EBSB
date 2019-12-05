@@ -6,10 +6,10 @@ var t = 0;
 var can_play = true;
 var start_state = false;
 var viewpoint_compensation = {viewpoint: 0, t: 0};
-
+var global_pos;
 const deg = 45;
-const AFRAME_WIDTH = 8;
-const AFRAME_HEIGHT = 4;
+var AFRAME_WIDTH;
+var AFRAME_HEIGHT;
 
 window.addEventListener('keydown', function (evt) {
     if (window.event.keyCode === 32) {
@@ -57,22 +57,30 @@ function current_state_update(state, node) {
 
 AFRAME.registerComponent('main', {
     init: function () {
-        let position = this.data;
+        global_pos = this.data;
         let cursor = $("#play_pause");
 
         let videosphere = document.querySelector('#vr_view');
 
-        if (position === 'seoultech') {
-            videosphere.setAttribute('rotation', {x:0, y: 270, z: 0})
-        } else if (position === 'hangkong') {
-            videosphere.setAttribute('rotation', {x:0, y: -45, z: 0})
+        if (global_pos === 'seoultech') {
+            videosphere.setAttribute('rotation', {x:0, y: 270, z: 0});
+            AFRAME_WIDTH = 8;
+            AFRAME_HEIGHT = 4;
+        } else if (global_pos === 'hangkong') {
+            videosphere.setAttribute('rotation', {x:0, y: 135, z: 0});
+            AFRAME_WIDTH = 8;
+            AFRAME_HEIGHT = 4;
+        } else if (global_pos === 'hangkong2') {
+            videosphere.setAttribute('rotation', {x:0, y: -20, z: 0});
+            AFRAME_WIDTH = 4;
+            AFRAME_HEIGHT = 8;
         } else {
             throw Error('Not Implement Error')
         }
 
 
         cursor.click(cursor_click_handler);
-        request_data(position).then(requested_data_handler);
+        request_data(global_pos).then(requested_data_handler);
         let cam = document.querySelector('#camera');
         cam.setAttribute('rotation', {
             x: 0,
@@ -107,7 +115,9 @@ AFRAME.registerComponent('main', {
         if (pos === 'seoultech') {
             document.querySelector('#m_camera').style.transform = "rotate(" + minimap_yaw + "deg)";
         } else if (pos === 'hangkong') {
-            document.querySelector('#m_camera').style.transform = "rotate(" + (minimap_yaw + 180) + "deg)";
+            document.querySelector('#m_camera').style.transform = "rotate(" + (minimap_yaw) + "deg)";
+        } else if (pos === 'hangkong2') {
+            document.querySelector('#m_camera').style.transform = "rotate(" + minimap_yaw + "deg)";
         } else {
             throw Error('Not Implement error')
         }
@@ -169,8 +179,8 @@ function requested_data_handler(result) {
     }
 
     console.log(node_link);
-    create_minimap(node_link, result[result.length / 2]);
-    create_view(node_link, result[result.length / 2]);
+    create_minimap(node_link, result[Math.round(result.length / 2)]);
+    create_view(node_link, result[Math.round(result.length / 2)]);
     main_player.updateSettings({
         debug: {
             logLevel: dashjs.Debug.LOG_LEVEL_INFO
@@ -184,9 +194,6 @@ function requested_data_handler(result) {
             cacheLoadThresholds: {video:5, audio:5},
             lastMediaSettingsCachingInfo: {enabled: false}
         },
-        audioVideo: {
-            audio:false
-        }
         // streaming: {
         //     lastBitrateCachingInfo: {enabled: false},
         //     cacheLoadThresholds: {audio: 50},
@@ -282,6 +289,8 @@ function request_data(position) {
 
 function create_view(data, initial) {
     let initial_view_id = initial.fileId;
+    console.log(data);
+    console.log(initial);
     let moveable = data[initial_view_id].get_moveable_node();
 
     cur_node.cur = initial_view_id;
@@ -397,6 +406,19 @@ function view_click_handler(node) {
                 });
             }
 
+            if (global_pos === 'hangkong2') {
+                let videosphere = document.querySelector('#vr_view');
+                console.log(node.id);
+                if (node.id === 'set4') {
+                    videosphere.setAttribute('rotation', {x:0, y: -20, z: 0});
+                } else if (node.id === 'set5'){
+                    videosphere.setAttribute('rotation', {x:0, y: 30, z: 0});
+                } else {
+                    videosphere.setAttribute('rotation', {x:0, y: 90, z: 0});
+
+                }
+            }
+
         }
     };
 }
@@ -448,8 +470,6 @@ function node_click_handler(node) {
 }
 
 function create_minimap(node_link ,initial) {
-    console.log(node_link);
-
     let map_canvas = document.querySelector('#minimap');
     Object.values(node_link).forEach(function (node) {
         let m_node = document.createElement('a-entity');

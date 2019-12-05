@@ -1,7 +1,8 @@
 var map;
 var data = [
     {position: {lat: 37.631923, lng: 127.077481}, name: "seoultech"},
-    {position: {lat: 37.599643, lng:126.865175}, name: "hangkong"}
+    {position: {lat: 37.597667, lng:126.866351}, name: "hangkong"},
+    {position: {lat: 37.599643, lng:126.865175}, name: "hangkong2"}
 ];
 
 function initMap() {
